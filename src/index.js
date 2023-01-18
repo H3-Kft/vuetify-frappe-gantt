@@ -685,13 +685,19 @@ export default class Gantt {
 
             this.bar_being_dragged = parent_bar_id;
 
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                $bar.ox = $bar.getX();
-                $bar.oy = $bar.getY();
-                $bar.owidth = $bar.getWidth();
-                $bar.finaldx = 0;
-            });
+            if (typeof bars !== 'undefined') {
+                // console.log(bars);
+                bars.forEach((bar) => {
+                    // console.log(bar);
+                    if (typeof bar !== 'undefined') {
+                        const $bar = bar.$bar;
+                        $bar.ox = $bar.getX();
+                        $bar.oy = $bar.getY();
+                        $bar.owidth = $bar.getWidth();
+                        $bar.finaldx = 0;
+                    }
+                });
+            }
         });
 
         $.on(this.$svg, 'mousemove', (e) => {
@@ -700,35 +706,37 @@ export default class Gantt {
             const dy = e.offsetY - y_on_start;
 
             bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                $bar.finaldx = this.get_snap_position(dx);
-                this.hide_popup();
-                if (is_resizing_left) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                            width: $bar.owidth - $bar.finaldx,
-                        });
-                    } else {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                        });
-                    }
-                } else if (is_resizing_right) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            width: $bar.owidth + $bar.finaldx,
-                        });
-                    }
-                } else if (is_dragging) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                if (typeof bar !== 'undefined') {
+                    const $bar = bar.$bar;
+                    $bar.finaldx = this.get_snap_position(dx);
+                    this.hide_popup();
+                    if (is_resizing_left) {
+                        if (parent_bar_id === bar.task.id) {
+                            bar.update_bar_position({
+                                x: $bar.ox + $bar.finaldx,
+                                width: $bar.owidth - $bar.finaldx,
+                            });
+                        } else {
+                            bar.update_bar_position({
+                                x: $bar.ox + $bar.finaldx,
+                            });
+                        }
+                    } else if (is_resizing_right) {
+                        if (parent_bar_id === bar.task.id) {
+                            bar.update_bar_position({
+                                width: $bar.owidth + $bar.finaldx,
+                            });
+                        }
+                    } else if (is_dragging) {
+                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    }    
                 }
             });
         });
 
         document.addEventListener('mouseup', (e) => {
             if (is_dragging || is_resizing_left || is_resizing_right) {
-                bars.forEach((bar) => bar.group.classList.remove('active'));
+                bars.forEach((bar) => {if (typeof bar !== 'undefined') bar.group.classList.remove('active')});
             }
 
             is_dragging = false;
@@ -738,12 +746,17 @@ export default class Gantt {
 
         $.on(this.$svg, 'mouseup', (e) => {
             this.bar_being_dragged = null;
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                if (!$bar.finaldx) return;
-                bar.date_changed();
-                bar.set_action_completed();
-            });
+            if (typeof bars !== 'undefined') {
+                bars.forEach((bar) => {
+                    if (typeof bar !== 'undefined') {
+                        // console.log(bar);
+                        const $bar = bar.$bar;
+                        if (!$bar.finaldx) return;
+                        bar.date_changed();
+                        bar.set_action_completed();
+                    }
+                });    
+            }
         });
 
         this.bind_bar_progress();
